@@ -115,14 +115,14 @@
       var syntaxMessage = getInputBoxValue();
 
       _.each(mentionsCollection, function (mention) {
-        var textSyntax = settings.templates.mentionItemSyntax(_.extend({}, mention, {value: utils.htmlEncode(mention.value), triggerChar: mention.trigger}));
+        var textSyntax = settings.templates.mentionItemSyntax(_.extend({}, mention, {value: utils.htmlEncode(mention.value)}));
         syntaxMessage = syntaxMessage.replace(mention.value, textSyntax);
       });
 
       var mentionText = utils.htmlEncode(syntaxMessage);
 
       _.each(mentionsCollection, function (mention) {
-        var formattedMention = _.extend({}, mention, {value: utils.htmlEncode(mention.value), triggerChar: mention.trigger});
+        var formattedMention = _.extend({}, mention, {value: utils.htmlEncode(mention.value)});
         var textSyntax = settings.templates.mentionItemSyntax(formattedMention);
         var textHighlight = settings.templates.mentionItemHighlight(formattedMention);
 
@@ -169,7 +169,7 @@
       var startEndIndex = (start + mention.value).length + 1;
 
       mentionsCollection.push(
-        _.extend({}, mention, {trigger : currentTriggerChar})
+        _.extend({}, mention, {triggerChar : currentTriggerChar})
       );
 
       // Cleaning before inserting the value, otherwise auto-complete would be triggered with "old" inputbuffer

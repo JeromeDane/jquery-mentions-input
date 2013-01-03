@@ -1,7 +1,7 @@
 $(function () {
 
   $('textarea.mention').mentionsInput({
-    triggerChar : ['@', '#'],
+    triggerChar : ['@','#'],
     onCaret: true,
     onDataRequest:function (mode, query, callback, triggerChar) {
       var data = [];
@@ -21,9 +21,9 @@ $(function () {
       }
       else {
         data = [
-                { id:'12121',  name:'Pasta', 'avatar':'http://cdn0.4dots.com/i/customavatars/avatar7112_1.gif', 'type':'tag' },
-                { id:'231223', name:'Pizza', 'avatar':'http://cdn0.4dots.com/i/customavatars/avatar7112_1.gif', 'type':'tag' },
-                { id:'72',     name:'Potates', 'avatar':'http://cdn0.4dots.com/i/customavatars/avatar7112_1.gif', 'type':'tag' },
+            { id:'12121',  name:'Pasta', 'avatar':'http://cdn0.4dots.com/i/customavatars/avatar7112_1.gif', 'type':'tag' },
+            { id:'231223', name:'Pizza', 'avatar':'http://cdn0.4dots.com/i/customavatars/avatar7112_1.gif', 'type':'tag' },
+            { id:'72',     name:'Potates', 'avatar':'http://cdn0.4dots.com/i/customavatars/avatar7112_1.gif', 'type':'tag' },
         ];
       }
 
