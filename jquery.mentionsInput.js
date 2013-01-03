@@ -132,6 +132,7 @@
       mentionText = mentionText.replace(/ {2}/g, '&nbsp; ');
 
       elmInputBox.data('messageText', syntaxMessage);
+      elmInputBox.trigger('updated');
       elmMentionsOverlay.find('div').html(mentionText);
     }
 
@@ -173,6 +174,7 @@
       // Mentions & syntax message
       var updatedMessageText = start + mention.value + ' ' + end;
       elmInputBox.val(updatedMessageText);
+      elmInputBox.trigger('mention');
       updateValues();
 
       // Set correct focus and selection
