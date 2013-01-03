@@ -66,11 +66,12 @@
 
   var MentionsInput = function (settings) {
 
-    var domInput, elmInputBox, elmInputWrapper, elmAutocompleteList, elmWrapperBox, elmMentionsOverlay, elmActiveAutoCompleteItem;
     var mentionsCollection = [];
     var autocompleteItemCollection = {};
     var inputBuffer = [];
     var currentDataQuery = ''; //https://github.com/podio/jquery-mentions-input/pull/44
+    var domInput, elmInputBox, elmInputWrapper, elmAutocompleteList, elmWrapperBox,
+        elmMentionsOverlay, elmActiveAutoCompleteItem, currentTriggerChar;
 
     settings = $.extend(true, {}, defaultSettings, settings );
 
@@ -153,9 +154,6 @@
     function addMention(mention) {
 
       var currentMessage = getInputBoxValue();
-      
-      //! TODO: Remove reliance on .data() - https://github.com/podio/jquery-mentions-input/pull/7/#issuecomment-3649964
-      var currentTriggerChar = elmInputBox.data('triggerChar');
 
       // Using a regex to figure out positions
       var regex = new RegExp("\\" + currentTriggerChar + currentDataQuery, "gi");
@@ -389,7 +387,7 @@
       if (query && query.length && query.length >= settings.minChars) {
         settings.onDataRequest.call(this, 'search', query, function (responseData) {
           populateDropdown(query, responseData);
-          elmInputBox.data('triggerChar', triggerChar);
+          currentTriggerChar = triggerChar;
         }, triggerChar);
       }
     }
