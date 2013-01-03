@@ -18,6 +18,7 @@
     minChars      : 2,
     showAvatars   : true,
     elastic       : true,
+    display       : 'name',
     onCaret       : false,
     classes       : {
       autoCompleteItemActive : "active"
@@ -29,7 +30,7 @@
       autocompleteListItemAvatar : _.template('<img  src="<%= avatar %>" />'),
       autocompleteListItemIcon   : _.template('<div class="icon <%= icon %>"></div>'),
       mentionsOverlay            : _.template('<div class="mentions"><div></div></div>'),
-      mentionItemSyntax          : _.template('@[<%= value %>](<%= type %>:<%= id %>)'),
+      mentionItemSyntax          : _.template('<%= triggerChar %>[<%= value %>](<%= type %>:<%= id %>)'),
       mentionItemHighlight       : _.template('<strong><span><%= value %></span></strong>')
     }
   };
@@ -152,9 +153,12 @@
     function addMention(mention) {
 
       var currentMessage = getInputBoxValue();
+      
+      //! TODO: Remove reliance on .data() - https://github.com/podio/jquery-mentions-input/pull/7/#issuecomment-3649964
+      var currentTriggerChar = elmInputBox.data('triggerChar');
 
       // Using a regex to figure out positions
-      var regex = new RegExp("\\" + settings.triggerChar + currentDataQuery, "gi");
+      var regex = new RegExp("\\" + currentTriggerChar + currentDataQuery, "gi");
       regex.exec(currentMessage);
 
       var startCaretPosition = regex.lastIndex - currentDataQuery.length - 1;
@@ -164,7 +168,9 @@
       var end = currentMessage.substr(currentCaretPosition, currentMessage.length);
       var startEndIndex = (start + mention.value).length + 1;
 
-      mentionsCollection.push(mention);
+      mentionsCollection.push(
+        _.extend({}, mention, {trigger : currentTriggerChar})
+      );
 
       // Cleaning before inserting the value, otherwise auto-complete would be triggered with "old" inputbuffer
       resetBuffer();
@@ -217,7 +223,7 @@
 
       return false;
     }
-
+    
     function onInputBoxClick(e) {
       resetBuffer();
     }
@@ -226,18 +232,28 @@
       hideAutoComplete();
     }
 
+    function checkTriggerChar(inputBuffer, triggerChar) {
+      var triggerCharIndex = _.lastIndexOf(inputBuffer, triggerChar);
+      if (triggerCharIndex > -1) {
+        currentDataQuery = inputBuffer.slice(triggerCharIndex + 1).join('');
+        _.defer(_.bind(doSearch, this, currentDataQuery, triggerChar));
+      }
+    }
+
     function onInputBoxInput(e) {
       updateValues();
       updateMentionsCollection();
       hideAutoComplete();
 
-      var triggerCharIndex = _.lastIndexOf(inputBuffer, settings.triggerChar);
-      if (triggerCharIndex > -1) {
-        currentDataQuery = inputBuffer.slice(triggerCharIndex + 1).join('');
-        currentDataQuery = utils.rtrim(currentDataQuery);
 
-        _.defer(_.bind(doSearch, this, currentDataQuery));
+      if (_.isArray(settings.triggerChar)) {
+        _.each(settings.triggerChar, function (triggerChar) {
+          checkTriggerChar(inputBuffer, triggerChar);
+        });
+      } else {
+        checkTriggerChar(inputBuffer, settings.triggerChar);
       }
+
     }
 
     function onInputBoxKeyPress(e) {
@@ -342,7 +358,7 @@
 
         var elmListItem = $(settings.templates.autocompleteListItem({
           'id'      : utils.htmlEncode(item.id),
-          'display' : utils.htmlEncode(item.name),
+          'display' : utils.htmlEncode([settings.display]),
           'type'    : utils.htmlEncode(item.type),
           'content' : utils.highlightTerm(utils.htmlEncode((item.display ? item.display : item.name)), query)
         })).attr('data-uid', itemUid);
@@ -369,17 +385,19 @@
       elmDropDownList.show();
     }
 
-    function doSearch(query) {
+    function doSearch(query, triggerChar) {
       if (query && query.length && query.length >= settings.minChars) {
         settings.onDataRequest.call(this, 'search', query, function (responseData) {
           populateDropdown(query, responseData);
-        });
+          elmInputBox.data('triggerChar', triggerChar);
+        }, triggerChar);
       }
     }
 
     function positionAutocomplete(elmAutocompleteList, elmInputBox) {
       var position = textareaSelectionPosition(elmInputBox),
           lineHeight = parseInt(elmInputBox.css('line-height'), 10) || 18;
+          
       elmAutocompleteList.css('width', '15em'); // Sort of a guess
       elmAutocompleteList.css('left', position.left);
       elmAutocompleteList.css('top', lineHeight + position.top);
@@ -434,9 +452,9 @@
   $.fn.mentionsInput = function (method, settings) {
 
     var outerArguments = arguments;
-
+    
     if (typeof method === 'object' || !method) {
-      settings = method;
+      settings = $.extend(true, {}, defaultSettings, method);
     }
 
     return this.each(function () {
