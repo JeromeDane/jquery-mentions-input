@@ -115,14 +115,14 @@
       var syntaxMessage = getInputBoxValue();
 
       _.each(mentionsCollection, function (mention) {
-        var textSyntax = settings.templates.mentionItemSyntax(mention);
+        var textSyntax = settings.templates.mentionItemSyntax(_.extend({}, mention, {value: utils.htmlEncode(mention.value), triggerChar: mention.trigger}));
         syntaxMessage = syntaxMessage.replace(mention.value, textSyntax);
       });
 
       var mentionText = utils.htmlEncode(syntaxMessage);
 
       _.each(mentionsCollection, function (mention) {
-        var formattedMention = _.extend({}, mention, {value: utils.htmlEncode(mention.value)});
+        var formattedMention = _.extend({}, mention, {value: utils.htmlEncode(mention.value), triggerChar: mention.trigger});
         var textSyntax = settings.templates.mentionItemSyntax(formattedMention);
         var textHighlight = settings.templates.mentionItemHighlight(formattedMention);
 
