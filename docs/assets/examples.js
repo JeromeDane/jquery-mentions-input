@@ -14,9 +14,9 @@ $(function () {
             { id:4, name:'Kasper Hulthin', 'avatar':'http://cdn0.4dots.com/i/customavatars/avatar7112_1.gif', 'type':'contact' },
             { id:5, name:'Andreas Haugstrup', 'avatar':'http://cdn0.4dots.com/i/customavatars/avatar7112_1.gif', 'type':'contact' },
             { id:6, name:'Pete Lacey', 'avatar':'http://cdn0.4dots.com/i/customavatars/avatar7112_1.gif', 'type':'contact' },
-            { id:7, name:'kenneth@auchenberg.dk', 'avatar':'http://cdn0.4dots.com/i/customavatars/avatar7112_1.gif', 'type':'contact' },
-            { id:8, name:'Pete Awesome Lacey', 'avatar':'http://cdn0.4dots.com/i/customavatars/avatar7112_1.gif', 'type':'contact' },
-            { id:9, name:'Kenneth Hulthin', 'avatar':'http://cdn0.4dots.com/i/customavatars/avatar7112_1.gif', 'type':'contact' }
+            { id:7, name:'Brennan McEachran', 'avatar':'https://secure.gravatar.com/avatar/2fdf8dfe329dd7dce510bcf0c32e3ef3?s=140&d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png', 'type':'contact' },
+            { id:8, name:'Brennan W. McEachran', 'avatar':'https://secure.gravatar.com/avatar/2fdf8dfe329dd7dce510bcf0c32e3ef3?s=140&d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png', 'type':'contact' },
+            { id:9, name:'Brennan W. H. McEachran', 'avatar':'https://secure.gravatar.com/avatar/2fdf8dfe329dd7dce510bcf0c32e3ef3?s=140&d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png', 'type':'contact' }
           ];
       }
       else {
