@@ -69,7 +69,7 @@
     var mentionsCollection = [];
     var autocompleteItemCollection = {};
     var inputBuffer = [];
-    var currentDataQuery;
+    var currentDataQuery = ''; //https://github.com/podio/jquery-mentions-input/pull/44
 
     settings = $.extend(true, {}, defaultSettings, settings );
 
