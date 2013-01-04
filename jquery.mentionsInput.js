@@ -19,7 +19,7 @@
     showAvatars   : true,
     elastic       : true,
     display       : 'name',
-    parseValue    : function(item) { return item.value; }
+    parseValue    : function(item) { return item.value; },
     onCaret       : true,
     classes       : {
       autoCompleteItemActive : "active"
