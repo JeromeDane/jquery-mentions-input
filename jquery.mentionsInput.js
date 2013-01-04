@@ -19,7 +19,7 @@
     showAvatars   : true,
     elastic       : true,
     display       : 'name',
-    parseValue    : function(item) { return item.value; },
+    parseValue    : function(item, triggerChar) { return item.value; },
     onCaret       : true,
     classes       : {
       autoCompleteItemActive : "active"
@@ -204,7 +204,7 @@
       var currentMessage = getInputBoxValue();
 
       var currentCaratPosition = utils.getCaratPosition(elmInputBox[0]);
-      var startMentionPosition = currentMessage.substr(0, currentCaratPosition).lastIndexOf(settings.triggerChar);
+      var startMentionPosition = currentMessage.substr(0, currentCaratPosition).lastIndexOf(currentTriggerChar);
       var endMentionPosition = startMentionPosition + currentDataQuery.length;
       
       var start = currentMessage.substr(0, startMentionPosition);
@@ -374,7 +374,7 @@
       _.each(results, function (item, index) {
         var itemUid = _.uniqueId('mention_');
 
-        autocompleteItemCollection[itemUid] = _.extend({}, item, {value: settings.parseValue(item)});
+        autocompleteItemCollection[itemUid] = _.extend({}, item, {value: settings.parseValue(item, currentTriggerChar)});
 
         var elmListItem = $(settings.templates.autocompleteListItem({
           'id'      : utils.htmlEncode(item.id),
