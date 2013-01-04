@@ -19,6 +19,7 @@
     showAvatars   : true,
     elastic       : true,
     display       : 'name',
+    parseValue    : function(item) { return item.value; }
     onCaret       : true,
     classes       : {
       autoCompleteItemActive : "active"
@@ -68,8 +69,22 @@
         }
       }
     },
-    
-    getCaratPosition : function($el){
+    getCaratPosition: function (domNode) {
+      if (domNode.selectionStart) {
+        return domNode.selectionStart;
+      }
+      else if (domNode.ownerDocument.selection) {
+        var range = domNode.ownerDocument.selection.createRange();
+        if(!range) return 0;
+        var textrange = domNode.createTextRange();
+        var textrange2 = textrange.duplicate();
+
+        textrange.moveToBookmark(range.getBookmark());
+        textrange2.setEndPoint('EndToStart', textrange);
+        return textrange2.text.length;
+      }
+    },
+    getCaratOffset : function($el){
     // This is taken straight from live (as of Sep 2012) GitHub code. The
     // technique is known around the web. Just google it. Github's is quite
     // succint though. NOTE: relies on selectionEnd, which as far as IE is concerned,
@@ -188,15 +203,12 @@
 
       var currentMessage = getInputBoxValue();
 
-      // Using a regex to figure out positions
-      var regex = new RegExp("\\" + currentTriggerChar + currentDataQuery, "gi");
-      regex.exec(currentMessage);
-
-      var startCaretPosition = regex.lastIndex - currentDataQuery.length - 1;
-      var currentCaretPosition = regex.lastIndex;
-
-      var start = currentMessage.substr(0, startCaretPosition);
-      var end = currentMessage.substr(currentCaretPosition, currentMessage.length);
+      var currentCaratPosition = utils.getCaratPosition(elmInputBox[0]);
+      var startMentionPosition = currentMessage.substr(0, currentCaratPosition).lastIndexOf(settings.triggerChar);
+      var endMentionPosition = startMentionPosition + currentDataQuery.length;
+      
+      var start = currentMessage.substr(0, startMentionPosition);
+      var end = currentMessage.substr(endMentionPosition + 1, currentMessage.length);
       var startEndIndex = (start + mention.value).length + 1;
 
       mentionsCollection.push(
@@ -362,7 +374,7 @@
       _.each(results, function (item, index) {
         var itemUid = _.uniqueId('mention_');
 
-        autocompleteItemCollection[itemUid] = _.extend({}, item, {value: item[settings.display]});
+        autocompleteItemCollection[itemUid] = _.extend({}, item, {value: settings.parseValue(item)});
 
         var elmListItem = $(settings.templates.autocompleteListItem({
           'id'      : utils.htmlEncode(item.id),
@@ -407,7 +419,7 @@
     }
 
     function positionAutocomplete(elmAutocompleteList, elmInputBox) {
-      var position = utils.getCaratPosition(elmInputBox),
+      var position = utils.getCaratOffset(elmInputBox),
           lineHeight = parseInt(elmInputBox.css('line-height'), 10) || 18;
           
       elmAutocompleteList.css('width', '15em'); // Sort of a guess
