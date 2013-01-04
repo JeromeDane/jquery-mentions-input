@@ -19,18 +19,27 @@
     showAvatars   : true,
     elastic       : true,
     display       : 'name',
-    onCaret       : false,
+    onCaret       : true,
     classes       : {
       autoCompleteItemActive : "active"
     },
     templates     : {
+      //Element to wrap the textarea, and soon to be created div + hidden inputs
       wrapper                    : _.template('<div class="mentions-input-box"></div>'),
+      
+      // Autocomplete elements
       autocompleteList           : _.template('<div class="mentions-autocomplete-list"></div>'),
       autocompleteListItem       : _.template('<li data-ref-id="<%= id %>" data-ref-type="<%= type %>" data-display="<%= display %>"><%= content %></li>'),
       autocompleteListItemAvatar : _.template('<img  src="<%= avatar %>" />'),
       autocompleteListItemIcon   : _.template('<div class="icon <%= icon %>"></div>'),
+      
+      // <div> layered under the <textarea>
       mentionsOverlay            : _.template('<div class="mentions"><div></div></div>'),
+      
+      // Syntax for .mentionsInput('val') which will probably be sent to the server
       mentionItemSyntax          : _.template('<%= triggerChar %>[<%= value %>](<%= type %>:<%= id %>)'),
+      
+      // Structure for highlighting the text in the
       mentionItemHighlight       : _.template('<strong class="<%= type %>"><span><%= value %></span></strong>')
     }
   };
@@ -59,8 +68,57 @@
         }
       }
     },
+    
+    getCaratPosition : function($el){
+    // This is taken straight from live (as of Sep 2012) GitHub code. The
+    // technique is known around the web. Just google it. Github's is quite
+    // succint though. NOTE: relies on selectionEnd, which as far as IE is concerned,
+    // it'll only work on 9+. Good news is nothing will happen if the browser
+    // doesn't support it.
+	  var a, b, c, d, e, f, g, h, i, j, k;
+      if (!(i = $el[0])) return;
+      if (!$(i).is("textarea")) return;
+      if (i.selectionEnd == null) return;
+      g = {
+        position: "absolute",
+        overflow: "auto",
+        whiteSpace: "pre-wrap",
+        wordWrap: "break-word",
+        boxSizing: "content-box",
+        top: 0,
+        left: -9999
+      }, h = ["boxSizing", "fontFamily", "fontSize", "fontStyle", "fontVariant", "fontWeight", "height", "letterSpacing", "lineHeight", "paddingBottom", "paddingLeft", "paddingRight", "paddingTop", "textDecoration", "textIndent", "textTransform", "width", "word-spacing"];
+      for (j = 0, k = h.length; j < k; j++) e = h[j], g[e] = $(i).css(e);
+      return c = document.createElement("div"), $(c).css(g), $(i).after(c), b = document.createTextNode(i.value.substring(0, i.selectionEnd)), a = document.createTextNode(i.value.substring(i.selectionEnd)), d = document.createElement("span"), d.innerHTML = "&nbsp;", c.appendChild(b), c.appendChild(d), c.appendChild(a), c.scrollTop = i.scrollTop, f = $(d).position(), $(c).remove(), f  
+    },
+    
     rtrim: function(string) {
       return string.replace(/\s+$/,"");
+    },
+    copyElemntStyle: function ($el){
+        var dom = $el;
+        var style;
+        var returns = {};
+        if(window.getComputedStyle){
+            var camelize = function(a,b){
+                return b.toUpperCase();
+            };
+            style = window.getComputedStyle(dom, null);
+            for(var i = 0, l = style.length; i < l; i++){
+                var prop = style[i];
+                var camel = prop.replace(/\-([a-z])/g, camelize);
+                var val = style.getPropertyValue(prop);
+                returns[camel] = val;
+            };
+            return returns;
+        };
+        if(style = dom.currentStyle){
+            for(var prop in style){
+                returns[prop] = style[prop];
+            };
+            return returns;
+        };
+        return returns;
     }
   };
 
@@ -110,35 +168,8 @@
     function initMentionsOverlay() {
       elmMentionsOverlay = $(settings.templates.mentionsOverlay());
       //! TODO: Allow the plugin to copy the styles of textarea
-      //elmMentionsOverlay.css(copyElemntStyle(domInput));
+      //elmMentionsOverlay.css(utils.copyElemntStyle(domInput));
       elmMentionsOverlay.prependTo(elmWrapperBox);
-    }
-    
-    //From: http://upshots.org/?p=112
-    function copyElemntStyle($el){
-        var dom = $el;
-        var style;
-        var returns = {};
-        if(window.getComputedStyle){
-            var camelize = function(a,b){
-                return b.toUpperCase();
-            };
-            style = window.getComputedStyle(dom, null);
-            for(var i = 0, l = style.length; i < l; i++){
-                var prop = style[i];
-                var camel = prop.replace(/\-([a-z])/g, camelize);
-                var val = style.getPropertyValue(prop);
-                returns[camel] = val;
-            };
-            return returns;
-        };
-        if(style = dom.currentStyle){
-            for(var prop in style){
-                returns[prop] = style[prop];
-            };
-            return returns;
-        };
-        return returns;
     }
     
     function updateValues() {
@@ -217,29 +248,6 @@
 
     function getInputBoxValue() {
       return $.trim(elmInputBox.val());
-    }
-
-    // This is taken straight from live (as of Sep 2012) GitHub code. The
-    // technique is known around the web. Just google it. Github's is quite
-    // succint though. NOTE: relies on selectionEnd, which as far as IE is concerned,
-    // it'll only work on 9+. Good news is nothing will happen if the browser
-    // doesn't support it.
-    function textareaSelectionPosition($el) {
-      var a, b, c, d, e, f, g, h, i, j, k;
-      if (!(i = $el[0])) return;
-      if (!$(i).is("textarea")) return;
-      if (i.selectionEnd == null) return;
-      g = {
-        position: "absolute",
-        overflow: "auto",
-        whiteSpace: "pre-wrap",
-        wordWrap: "break-word",
-        boxSizing: "content-box",
-        top: 0,
-        left: -9999
-      }, h = ["boxSizing", "fontFamily", "fontSize", "fontStyle", "fontVariant", "fontWeight", "height", "letterSpacing", "lineHeight", "paddingBottom", "paddingLeft", "paddingRight", "paddingTop", "textDecoration", "textIndent", "textTransform", "width", "word-spacing"];
-      for (j = 0, k = h.length; j < k; j++) e = h[j], g[e] = $(i).css(e);
-      return c = document.createElement("div"), $(c).css(g), $(i).after(c), b = document.createTextNode(i.value.substring(0, i.selectionEnd)), a = document.createTextNode(i.value.substring(i.selectionEnd)), d = document.createElement("span"), d.innerHTML = "&nbsp;", c.appendChild(b), c.appendChild(d), c.appendChild(a), c.scrollTop = i.scrollTop, f = $(d).position(), $(c).remove(), f
     }
 
     function onAutoCompleteItemClick(e) {
@@ -414,15 +422,19 @@
 
     function doSearch(query, triggerChar) {
       if (query && query.length && query.length >= settings.minChars) {
-        settings.onDataRequest.call(this, 'search', query, function (responseData) {
+        
+        var callback = function callback (responseData) {
           populateDropdown(query, responseData);
           currentTriggerChar = triggerChar;
-        }, triggerChar);
+        }
+        
+        settings.onDataRequest.call(this, 'search', query, triggerChar, callback);
+        
       }
     }
 
     function positionAutocomplete(elmAutocompleteList, elmInputBox) {
-      var position = textareaSelectionPosition(elmInputBox),
+      var position = utils.getCaratPosition(elmInputBox),
           lineHeight = parseInt(elmInputBox.css('line-height'), 10) || 18;
           
       elmAutocompleteList.css('width', '15em'); // Sort of a guess

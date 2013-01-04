@@ -3,7 +3,7 @@ $(function () {
   $('textarea.mention').mentionsInput({
     triggerChar : ['@','#'],
     onCaret: true,
-    onDataRequest:function (mode, query, callback, triggerChar) {
+    onDataRequest: function (mode, query, triggerChar, callback) {
       var data = [];
 
       if (triggerChar == '@') {
@@ -23,7 +23,7 @@ $(function () {
         data = [
             { id:'12121',  name:'Pasta', 'avatar':'http://cdn0.4dots.com/i/customavatars/avatar7112_1.gif', 'type':'issue' },
             { id:'231223', name:'Pizza', 'avatar':'http://cdn0.4dots.com/i/customavatars/avatar7112_1.gif', 'type':'issue' },
-            { id:'72',     name:'Potates', 'avatar':'http://cdn0.4dots.com/i/customavatars/avatar7112_1.gif', 'type':'issue' },
+            { id:'72',     name:'Potates', 'avatar':'http://cdn0.4dots.com/i/customavatars/avatar7112_1.gif', 'type':'issue' }
         ];
       }
 
