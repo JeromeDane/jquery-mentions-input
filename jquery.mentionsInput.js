@@ -37,10 +37,10 @@
       mentionsOverlay            : _.template('<div class="mentions"><div></div></div>'),
       
       // Syntax for .mentionsInput('val') which will probably be sent to the server
-      mentionItemSyntax          : _.template('<%= triggerChar %>[<%= value %>](<%= type %>:<%= id %>)'),
+      mentionItemSyntax          : _.template('<%= triggerChar %>[<%= display %>](<%= type %>:<%= id %>)'),
       
       // Structure for highlighting the text in the
-      mentionItemHighlight       : _.template('<strong class="<%= type %>"><span><%= value %></span></strong>')
+      mentionItemHighlight       : _.template('<strong class="<%= type %>"><span><%= display %></span></strong>')
     }
   };
 
@@ -209,7 +209,7 @@
       hideAutoComplete();
 
       // Mentions & syntax message
-      var updatedMessageText = start + mention.value + ' ' + end;
+      var updatedMessageText = start + mention[settings.display] + ' ' + end;
       elmInputBox.val(updatedMessageText);
       elmInputBox.trigger('mention');
       updateValues();
@@ -368,7 +368,7 @@
           'id'      : utils.htmlEncode(item.id),
           'display' : utils.htmlEncode(item[settings.display]),
           'type'    : utils.htmlEncode(item.type),
-          'content' : utils.highlightTerm(utils.htmlEncode((item.display ? item.display : item.name)), query)
+          'content' : utils.highlightTerm(utils.htmlEncode((item.name)), query)
         })).attr('data-uid', itemUid);
 
         if (index === 0) {
