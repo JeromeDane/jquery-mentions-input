@@ -94,31 +94,6 @@
     
     rtrim: function(string) {
       return string.replace(/\s+$/,"");
-    },
-    copyElemntStyle: function ($el){
-        var dom = $el;
-        var style;
-        var returns = {};
-        if(window.getComputedStyle){
-            var camelize = function(a,b){
-                return b.toUpperCase();
-            };
-            style = window.getComputedStyle(dom, null);
-            for(var i = 0, l = style.length; i < l; i++){
-                var prop = style[i];
-                var camel = prop.replace(/\-([a-z])/g, camelize);
-                var val = style.getPropertyValue(prop);
-                returns[camel] = val;
-            };
-            return returns;
-        };
-        if(style = dom.currentStyle){
-            for(var prop in style){
-                returns[prop] = style[prop];
-            };
-            return returns;
-        };
-        return returns;
     }
   };
 
@@ -167,8 +142,6 @@
 
     function initMentionsOverlay() {
       elmMentionsOverlay = $(settings.templates.mentionsOverlay());
-      //! TODO: Allow the plugin to copy the styles of textarea
-      //elmMentionsOverlay.css(utils.copyElemntStyle(domInput));
       elmMentionsOverlay.prependTo(elmWrapperBox);
     }
     
