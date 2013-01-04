@@ -368,7 +368,7 @@
           'id'      : utils.htmlEncode(item.id),
           'display' : utils.htmlEncode(item[settings.display]),
           'type'    : utils.htmlEncode(item.type),
-          'content' : utils.highlightTerm(utils.htmlEncode((item.display ? item.display : item.name)), query)
+          'content' : utils.highlightTerm(utils.htmlEncode((item.name)), query)
         })).attr('data-uid', itemUid);
 
         if (index === 0) {

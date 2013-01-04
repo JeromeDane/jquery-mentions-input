@@ -1,11 +1,7 @@
-jquery.mentionsInput
-=================
-
-To get started -- checkout http://podio.github.com/jquery-mentions-input
+Forked and updated from: <a href="https://github.com/podio/jquery-mentions-input">https://github.com/podio/jquery-mentions-input</a>.
 
 
-<h2>Download and source</h2>
-<p>You can grab the latest source from the repository on GitHub by clicking here: <a href="https://github.com/podio/jquery-mentions-input">https://github.com/podio/jquery-mentions-input</a>.</p>
+
 
 <h2>Getting started</h2>
 
@@ -54,20 +50,27 @@ $('textarea.mention').mentionsInput({
 <table>
   <tr>
     <td><b>onDataRequest</b></td>
-    <td><tt>function(mode, query, callback, triggerChar)</tt></td>
+    <td><tt>function(mode, query, triggerChar, callback)</tt></td>
     <td class="definition">
-      This function is a callback function which is used to provide data for the autocomplete. When a search starts
-      this function is called with following arguments: 'search', the query (what's been typed), and a callback function which needs to be called inside onDataRequest with a data collection to be searched on as a first argument.<br>
-      'triggerChar' which is the character that started this data request, so you can take different actions on a '@' or '#'.
+      <p>This function is a callback function which is used to provide data for the autocomplete. When a search starts
+      this function is called with following arguments:</p>
+      <p>'mode' &mdash; always set to 'search'</p>
+      <p>'query' &mdash; what's been typed so far by the user</p>
+      <p>'triggerChar' &mdash; which is the character that started this data request, so you can take different actions on a '@' or '#'.</p>
+      <p>'callback' &mdash; function which needs to be called inside onDataRequest with a data collection to be searched on as a first argument.</p>
+      
     </td>
   </tr>
   <tr>
     <td><b>triggerChar</b></td>
     <td><tt>@</tt></td>
     <td class="definition">
-      Trigger character which triggers the mentions search, when the character has been typed into the
-      mentions input field. You can specify more than one trigger char by providing an array. <br>
-      eg triggerChar : ['@', '#']
+      <p>Trigger character which triggers the mentions search, when the character has been typed into the
+      mentions input field.</p>
+      <p>You can specify more than one trigger char by providing an array.<br>
+      eg triggerChar : ['@', '#'] <br>
+      <small> Thanks to <a href="https://github.com/podio/jquery-mentions-input/pull/7">@ryanramage</a></small>
+      </p>
     </td>
   </tr>
   <tr>
@@ -75,7 +78,7 @@ $('textarea.mention').mentionsInput({
     <td><tt>true</tt></td>
     <td class="definition">
       When set to true the autocomplete will be positioned beside the Caret (like how Github does it)<br>
-      Thanks to <a href="https://github.com/podio/jquery-mentions-input/pull/53">@juliocesar</a>
+     <small> Thanks to <a href="https://github.com/podio/jquery-mentions-input/pull/53">@juliocesar</a></small>
     </td>
   </tr>
   <tr>
@@ -143,6 +146,26 @@ $('textarea.mention').mentionsInput({
   </tr>
 </table>
 
+<h2>Events</h2>
+
+<p>Two events may be triggered on the initialized element <small> Thanks to <a href="https://github.com/podio/jquery-mentions-input/pull/43">@johnfrederik</a></small></p>
+<table>
+  <tr>
+    <td><b>mention</b></td>
+    <td></td>
+    <td class="definition">
+      Triggered when a new mention was added.
+    </td>
+  </tr>
+  <tr>
+    <td><b>updated</b></td>
+    <td></td>
+    <td class="definition">
+      Triggered when the input was updated.
+    </td>
+  </tr>
+</table>
+
 <h2>Query data structure</h2>
 
 <p>When the component is preforming a "query" on the data specified through the onDataRequest-callback, it's expecting a specific data structure to be returned. </p>
@@ -155,16 +178,35 @@ $('textarea.mention').mentionsInput({
   'type'  : 'contact'
 }
 </pre>
-
-<p>"avatar" property is a URL used for image avatars when  "showAvatars"-option is enabled </p>
-<p>"icon" property is a className used for avatars when "showAvatars"-option is disabled</p>
-<p>"type" property specifies an object type which is used in the marked-up version of the mentions result</p>
+<table>
+  <tr>
+    <td><b>avatar</b></td>
+    <td></td>
+    <td class="definition">
+      property is a URL used for image avatars when  "showAvatars"-option is enabled 
+    </td>
+  </tr>
+  <tr>
+    <td><b>icon</b></td>
+    <td></td>
+    <td class="definition">
+      property is a className used for avatars when "showAvatars"-option is disabled
+    </td>
+  </tr>
+  <tr>
+    <td><b>type</b></td>
+    <td></td>
+    <td class="definition">
+      property specifies an object type which is used in the marked-up version of the mentions result
+    </td>
+  </tr>
+</table>
 
 
 <h2>Markup format</h2>
 <p>When mentions are being added to the input, a marked-up version of the value is generated, to allow the mentions to be extracted, parsed and stored later. </p>
 <pre>
-  This is a message for @[name](type:id) #[tag](type:id)
+  This is a message for @[name](type:id) #[name](type:id)
 </pre>
 <p>Like:</p>
 <pre>
