@@ -197,7 +197,7 @@
 
       var start = currentMessage.substr(0, startCaretPosition);
       var end = currentMessage.substr(currentCaretPosition, currentMessage.length);
-      var startEndIndex = (start + mention[settings.display]).length + 1;
+      var startEndIndex = (start + mention.value).length + 1;
 
       mentionsCollection.push(
         _.extend({}, mention, {triggerChar : currentTriggerChar})
@@ -209,7 +209,7 @@
       hideAutoComplete();
 
       // Mentions & syntax message
-      var updatedMessageText = start + mention[settings.display] + ' ' + end;
+      var updatedMessageText = start + mention.value + ' ' + end;
       elmInputBox.val(updatedMessageText);
       elmInputBox.trigger('mention');
       updateValues();
@@ -362,7 +362,7 @@
       _.each(results, function (item, index) {
         var itemUid = _.uniqueId('mention_');
 
-        autocompleteItemCollection[itemUid] = _.extend({}, item, {value: item.name});
+        autocompleteItemCollection[itemUid] = _.extend({}, item, {value: item[settings.display]});
 
         var elmListItem = $(settings.templates.autocompleteListItem({
           'id'      : utils.htmlEncode(item.id),
