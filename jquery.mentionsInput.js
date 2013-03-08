@@ -444,11 +444,6 @@
         initMentionsOverlay();
         resetInput();
 
-        if( settings.prefillText ) {
-          elmInputBox.data('messageText', settings.prefillText);
-          updateValues();
-        }
-
         if( settings.prefillMention ) {
           addMention( settings.prefillMention );
         }
@@ -462,10 +457,6 @@
 
         var value = mentionsCollection.length ? elmInputBox.data('messageText') : getInputBoxValue();
         callback.call(this, value);
-      },
-
-      update: function(){
-      	updateValues();
       },
 
       reset : function () {
