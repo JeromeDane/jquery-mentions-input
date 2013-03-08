@@ -442,8 +442,7 @@
         initTextarea();
         initAutocomplete();
         initMentionsOverlay();
-        mentionsCollection = [];
-      	updateValues();
+        resetInput();
 
         if( settings.prefillMention ) {
           addMention( settings.prefillMention );
