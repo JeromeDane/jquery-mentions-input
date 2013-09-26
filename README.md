@@ -174,7 +174,8 @@ $('textarea.mention').mentionsInput({
   'name'  : 'Kenneth Auchenberg',
   'avatar': 'http://cdn0.4dots.com/i/customavatars/avatar7112_1.gif',
   'icon'  : 'icon-16 icon-person',
-  'type'  : 'contact'
+  'type'  : 'contact',
+  'value' : 'Kenneth Auchenberg' // *new* the value to be displayed when displaying the mention
 }
 </pre>
 <table>
