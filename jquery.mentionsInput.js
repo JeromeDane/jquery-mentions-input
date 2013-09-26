@@ -18,18 +18,30 @@
     minChars      : 2,
     showAvatars   : true,
     elastic       : true,
+    display       : 'name',
+    parseValue    : function(item, triggerChar) { return item.value; },
+    onCaret       : true,
     classes       : {
       autoCompleteItemActive : "active"
     },
     templates     : {
+      //Element to wrap the textarea, and soon to be created div + hidden inputs
       wrapper                    : _.template('<div class="mentions-input-box"></div>'),
+      
+      // Autocomplete elements
       autocompleteList           : _.template('<div class="mentions-autocomplete-list"></div>'),
       autocompleteListItem       : _.template('<li data-ref-id="<%= id %>" data-ref-type="<%= type %>" data-display="<%= display %>"><%= content %></li>'),
-      autocompleteListItemAvatar : _.template('<img src="<%= avatar %>" />'),
+      autocompleteListItemAvatar : _.template('<img  src="<%= avatar %>" />'),
       autocompleteListItemIcon   : _.template('<div class="icon <%= icon %>"></div>'),
+      
+      // <div> layered under the <textarea>
       mentionsOverlay            : _.template('<div class="mentions"><div></div></div>'),
-      mentionItemSyntax          : _.template('@[<%= value %>](<%= type %>:<%= id %>)'),
-      mentionItemHighlight       : _.template('<strong><span><%= value %></span></strong>')
+      
+      // Syntax for .mentionsInput('val') which will probably be sent to the server
+      mentionItemSyntax          : _.template('<%= triggerChar %>[<%= value %>](<%= type %>:<%= id %>)'),
+      
+      // Structure for highlighting the text in the
+      mentionItemHighlight       : _.template('<strong class="<%= type %>"><span><%= value %></span></strong>')
     }
   };
 
@@ -57,6 +69,44 @@
         }
       }
     },
+    getCaratPosition: function (domNode) {
+      if (domNode.selectionStart) {
+        return domNode.selectionStart;
+      }
+      else if (domNode.ownerDocument.selection) {
+        var range = domNode.ownerDocument.selection.createRange();
+        if(!range) return 0;
+        var textrange = domNode.createTextRange();
+        var textrange2 = textrange.duplicate();
+
+        textrange.moveToBookmark(range.getBookmark());
+        textrange2.setEndPoint('EndToStart', textrange);
+        return textrange2.text.length;
+      }
+    },
+    getCaratOffset : function($el){
+    // This is taken straight from live (as of Sep 2012) GitHub code. The
+    // technique is known around the web. Just google it. Github's is quite
+    // succint though. NOTE: relies on selectionEnd, which as far as IE is concerned,
+    // it'll only work on 9+. Good news is nothing will happen if the browser
+    // doesn't support it.
+	  var a, b, c, d, e, f, g, h, i, j, k;
+      if (!(i = $el[0])) return;
+      if (!$(i).is("textarea")) return;
+      if (i.selectionEnd == null) return;
+      g = {
+        position: "absolute",
+        overflow: "auto",
+        whiteSpace: "pre-wrap",
+        wordWrap: "break-word",
+        boxSizing: "content-box",
+        top: 0,
+        left: -9999
+      }, h = ["boxSizing", "fontFamily", "fontSize", "fontStyle", "fontVariant", "fontWeight", "height", "letterSpacing", "lineHeight", "paddingBottom", "paddingLeft", "paddingRight", "paddingTop", "textDecoration", "textIndent", "textTransform", "width", "word-spacing"];
+      for (j = 0, k = h.length; j < k; j++) e = h[j], g[e] = $(i).css(e);
+      return c = document.createElement("div"), $(c).css(g), $(i).after(c), b = document.createTextNode(i.value.substring(0, i.selectionEnd)), a = document.createTextNode(i.value.substring(i.selectionEnd)), d = document.createElement("span"), d.innerHTML = "&nbsp;", c.appendChild(b), c.appendChild(d), c.appendChild(a), c.scrollTop = i.scrollTop, f = $(d).position(), $(c).remove(), f  
+    },
+    
     rtrim: function(string) {
       return string.replace(/\s+$/,"");
     }
@@ -64,11 +114,12 @@
 
   var MentionsInput = function (settings) {
 
-    var domInput, elmInputBox, elmInputWrapper, elmAutocompleteList, elmWrapperBox, elmMentionsOverlay, elmActiveAutoCompleteItem;
     var mentionsCollection = [];
     var autocompleteItemCollection = {};
     var inputBuffer = [];
-    var currentDataQuery;
+    var currentDataQuery = ''; //https://github.com/podio/jquery-mentions-input/pull/44
+    var domInput, elmInputBox, elmInputWrapper, elmAutocompleteList, elmWrapperBox,
+        elmMentionsOverlay, elmActiveAutoCompleteItem, currentTriggerChar;
 
     settings = $.extend(true, {}, defaultSettings, settings );
 
@@ -108,12 +159,12 @@
       elmMentionsOverlay = $(settings.templates.mentionsOverlay());
       elmMentionsOverlay.prependTo(elmWrapperBox);
     }
-
+    
     function updateValues() {
       var syntaxMessage = getInputBoxValue();
 
       _.each(mentionsCollection, function (mention) {
-        var textSyntax = settings.templates.mentionItemSyntax(mention);
+        var textSyntax = settings.templates.mentionItemSyntax(_.extend({}, mention, {value: utils.htmlEncode(mention.value)}));
         syntaxMessage = syntaxMessage.replace(mention.value, textSyntax);
       });
 
@@ -131,6 +182,7 @@
       mentionText = mentionText.replace(/ {2}/g, '&nbsp; ');
 
       elmInputBox.data('messageText', syntaxMessage);
+      elmInputBox.trigger('updated');
       elmMentionsOverlay.find('div').html(mentionText);
     }
 
@@ -151,18 +203,17 @@
 
       var currentMessage = getInputBoxValue();
 
-      // Using a regex to figure out positions
-      var regex = new RegExp("\\" + settings.triggerChar + currentDataQuery, "gi");
-      regex.exec(currentMessage);
-
-      var startCaretPosition = regex.lastIndex - currentDataQuery.length - 1;
-      var currentCaretPosition = regex.lastIndex;
-
-      var start = currentMessage.substr(0, startCaretPosition);
-      var end = currentMessage.substr(currentCaretPosition, currentMessage.length);
+      var currentCaratPosition = utils.getCaratPosition(elmInputBox[0]);
+      var startMentionPosition = currentMessage.substr(0, currentCaratPosition).lastIndexOf(currentTriggerChar);
+      var endMentionPosition = startMentionPosition + currentDataQuery.length;
+      
+      var start = currentMessage.substr(0, startMentionPosition);
+      var end = currentMessage.substr(endMentionPosition + 1, currentMessage.length);
       var startEndIndex = (start + mention.value).length + 1;
 
-      mentionsCollection.push(mention);
+      mentionsCollection.push(
+        _.extend({}, mention, {triggerChar : currentTriggerChar})
+      );
 
       // Cleaning before inserting the value, otherwise auto-complete would be triggered with "old" inputbuffer
       resetBuffer();
@@ -172,6 +223,7 @@
       // Mentions & syntax message
       var updatedMessageText = start + mention.value + ' ' + end;
       elmInputBox.val(updatedMessageText);
+      elmInputBox.trigger('mention');
       updateValues();
 
       // Set correct focus and selection
@@ -191,7 +243,7 @@
 
       return false;
     }
-
+    
     function onInputBoxClick(e) {
       resetBuffer();
     }
@@ -200,17 +252,28 @@
       hideAutoComplete();
     }
 
+    function checkTriggerChar(inputBuffer, triggerChar) {
+      var triggerCharIndex = _.lastIndexOf(inputBuffer, triggerChar);
+      if (triggerCharIndex > -1) {
+        currentDataQuery = inputBuffer.slice(triggerCharIndex + 1).join('');
+        _.defer(_.bind(doSearch, this, currentDataQuery, triggerChar));
+      }
+    }
+
     function onInputBoxInput(e) {
       updateValues();
       updateMentionsCollection();
+      hideAutoComplete();
 
-      var triggerCharIndex = _.lastIndexOf(inputBuffer, settings.triggerChar);
-      if (triggerCharIndex > -1) {
-        currentDataQuery = inputBuffer.slice(triggerCharIndex + 1).join('');
-        currentDataQuery = utils.rtrim(currentDataQuery);
 
-        _.defer(_.bind(doSearch, this, currentDataQuery));
+      if (_.isArray(settings.triggerChar)) {
+        _.each(settings.triggerChar, function (triggerChar) {
+          checkTriggerChar(inputBuffer, triggerChar);
+        });
+      } else {
+        checkTriggerChar(inputBuffer, settings.triggerChar);
       }
+
     }
 
     function onInputBoxKeyPress(e) {
@@ -311,11 +374,11 @@
       _.each(results, function (item, index) {
         var itemUid = _.uniqueId('mention_');
 
-        autocompleteItemCollection[itemUid] = _.extend({}, item, {value: item.name});
+        autocompleteItemCollection[itemUid] = _.extend({}, item, {value: settings.parseValue(item, currentTriggerChar)});
 
         var elmListItem = $(settings.templates.autocompleteListItem({
           'id'      : utils.htmlEncode(item.id),
-          'display' : utils.htmlEncode(item.name),
+          'display' : utils.htmlEncode(item[settings.display]),
           'type'    : utils.htmlEncode(item.type),
           'content' : utils.highlightTerm(utils.htmlEncode((item.name)), query)
         })).attr('data-uid', itemUid);
@@ -338,17 +401,30 @@
       });
 
       elmAutocompleteList.show();
+      if (settings.onCaret) positionAutocomplete(elmAutocompleteList, elmInputBox);
       elmDropDownList.show();
     }
 
-    function doSearch(query) {
+    function doSearch(query, triggerChar) {
       if (query && query.length && query.length >= settings.minChars) {
-        settings.onDataRequest.call(this, 'search', query, function (responseData) {
+        
+        var callback = function callback (responseData) {
           populateDropdown(query, responseData);
-        });
-      } else {
-        hideAutoComplete();
+          currentTriggerChar = triggerChar;
+        }
+        
+        settings.onDataRequest.call(this, 'search', query, triggerChar, callback);
+        
       }
+    }
+
+    function positionAutocomplete(elmAutocompleteList, elmInputBox) {
+      var position = utils.getCaratOffset(elmInputBox),
+          lineHeight = parseInt(elmInputBox.css('line-height'), 10) || 18;
+          
+      elmAutocompleteList.css('width', '15em'); // Sort of a guess
+      elmAutocompleteList.css('left', position.left);
+      elmAutocompleteList.css('top', lineHeight + position.top);
     }
 
     function resetInput() {
@@ -400,9 +476,9 @@
   $.fn.mentionsInput = function (method, settings) {
 
     var outerArguments = arguments;
-
+    
     if (typeof method === 'object' || !method) {
-      settings = method;
+      settings = $.extend(true, {}, defaultSettings, method);
     }
 
     return this.each(function () {
