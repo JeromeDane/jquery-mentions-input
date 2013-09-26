@@ -42,8 +42,8 @@
       mentionItemSyntax          : _.template('<%= triggerChar %>[<%= value %>](<%= type %>:<%= id %>)'),
       
       // Structure for highlighting the text in the
-      mentionItemHighlight       : _.template('<strong class="<%= type %> mention-highlight"><span><%= value %></span></strong>'),
-      mentionItemNoHighlight     : _.template('<strong class="<%= type %>"><span><%= value %></span></strong>')
+      mentionItemHighlight       : _.template('<strong class="<%= type %> mention-highlight" data-id="<%= id %>" data-name="<%= name %>" data-avatar="<%= avatar %>"><span><%= value %></span></strong>'),
+      mentionItemNoHighlight     : _.template('<strong class="<%= type %>" data-id="<%= id %>" data-name="<%= name %>" data-avatar="<%= avatar %>"><span><%= value %></span></strong>')
     }
   };
 
