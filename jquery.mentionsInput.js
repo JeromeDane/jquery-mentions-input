@@ -13,15 +13,16 @@
   // Settings
   var KEY = { BACKSPACE : 8, TAB : 9, RETURN : 13, ESC : 27, LEFT : 37, UP : 38, RIGHT : 39, DOWN : 40, COMMA : 188, SPACE : 32, HOME : 36, END : 35 }; // Keys "enum"
   var defaultSettings = {
-    triggerChar   : '@',
-    onDataRequest : $.noop,
-    minChars      : 2,
-    showAvatars   : true,
-    elastic       : true,
-    display       : 'name',
-    parseValue    : function(item, triggerChar) { return item.value; },
-    onCaret       : true,
-    classes       : {
+    triggerChar     : '@',
+    onDataRequest   : $.noop,
+    minChars        : 2,
+    showAvatars     : true,
+    elastic         : true,
+    display         : 'name',
+    parseValue      : function(item, triggerChar) { return item.value; },
+    onCaret         : true,
+    enableHighlight : true,
+    classes         : {
       autoCompleteItemActive : "active"
     },
     templates     : {
@@ -41,7 +42,8 @@
       mentionItemSyntax          : _.template('<%= triggerChar %>[<%= value %>](<%= type %>:<%= id %>)'),
       
       // Structure for highlighting the text in the
-      mentionItemHighlight       : _.template('<strong class="<%= type %>"><span><%= value %></span></strong>')
+      mentionItemHighlight       : _.template('<strong class="<%= type %> mention-highlight"><span><%= value %></span></strong>'),
+      mentionItemNoHighlight     : _.template('<strong class="<%= type %>"><span><%= value %></span></strong>')
     }
   };
 
@@ -123,6 +125,8 @@
 
     settings = $.extend(true, {}, defaultSettings, settings );
 
+    console.log(settings);
+
     function initTextarea() {
       elmInputBox = $(domInput);
 
@@ -173,7 +177,11 @@
       _.each(mentionsCollection, function (mention) {
         var formattedMention = _.extend({}, mention, {value: utils.htmlEncode(mention.value)});
         var textSyntax = settings.templates.mentionItemSyntax(formattedMention);
-        var textHighlight = settings.templates.mentionItemHighlight(formattedMention);
+
+        var textHighlight =
+            settings.enableHighlight
+                ? settings.templates.mentionItemHighlight(formattedMention)
+                : settings.templates.mentionItemNoHighlight(formattedMention);
 
         mentionText = mentionText.replace(textSyntax, textHighlight);
       });
