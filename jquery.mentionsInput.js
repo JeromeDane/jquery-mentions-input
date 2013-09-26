@@ -125,8 +125,6 @@
 
     settings = $.extend(true, {}, defaultSettings, settings );
 
-    console.log(settings);
-
     function initTextarea() {
       elmInputBox = $(domInput);
 
