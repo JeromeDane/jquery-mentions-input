@@ -108,6 +108,13 @@ $('textarea.mention').mentionsInput({
       Object which contains templates used to render the layout as key/value pairs.
     </td>
   </tr>
+  <tr>
+    <td><b>enableHighlight</b></td>
+	<td><tt>boolean</tt></td>
+	<td class="definition">
+	  Enables/disables the mention highlighting mechanism
+	</td>
+  </tr>
 </table>
 
 <h2>Methods</h2>
@@ -130,17 +137,17 @@ $('textarea.mention').mentionsInput({
     </td>
   </tr>
   <tr>
-    <td><b>val(callback)</b></td>
+    <td><b>val()</b></td>
     <td></td>
     <td class="definition">
-      An async method which accepts a callback function and returns a value of the input field (including markup) as a first parameter of this function. <br/><br/> This is the value you want to send to your server.
+      A method which returns a value of the input field (including markup) as a first parameter of this function. <br/><br/> This is the value you want to send to your server.
     </td>
   </tr>
   <tr>
-    <td><b>getMentions(callback)</b></td>
+    <td><b>getMentions()</b></td>
     <td></td>
     <td class="definition">
-      An async method which accepts a callback function and returns a collection of mentions as hash objects as a first parameter.
+      A method which returns a collection of mentions as hash objects as a first parameter.
     </td>
   </tr>
 </table>
