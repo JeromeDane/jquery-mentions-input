@@ -111,6 +111,11 @@
 
         rtrim: function (string) {
             return string.replace(/\s+$/, "");
+        },
+
+        lastIndexOf: function (string, pattern) {
+            var pos = string.split('').reverse().join('').search(pattern);
+            return pos === -1 ? pos : string.length - pos - 1;
         }
     };
 
@@ -124,6 +129,7 @@
             elmMentionsOverlay, elmActiveAutoCompleteItem, currentTriggerChar;
 
         settings = $.extend(true, {}, defaultSettings, settings);
+        settings.triggerCharPattern = new RegExp('[\\' + _.flatten([settings.triggerChar]).join('\\') + ']');
 
         function initTextarea() {
             elmInputBox = $(domInput);
@@ -140,6 +146,7 @@
             elmInputBox.attr('data-mentions-input', 'true');
             elmInputBox.bind('keydown', onInputBoxKeyDown);
             elmInputBox.bind('keypress', onInputBoxKeyPress);
+            elmInputBox.bind('compositionupdate', onInputBoxCompUpdate);
             elmInputBox.bind('input', onInputBoxInput);
             elmInputBox.bind('click', onInputBoxClick);
             elmInputBox.bind('blur', onInputBoxBlur);
@@ -155,6 +162,7 @@
             elmAutocompleteList = $(settings.templates.autocompleteList());
             elmAutocompleteList.appendTo(elmWrapperBox);
             elmAutocompleteList.delegate('li', 'mousedown', onAutoCompleteItemClick);
+            elmAutocompleteList.delegate('li', 'touchstart', onAutoCompleteItemClick);
         }
 
         function initMentionsOverlay() {
@@ -288,6 +296,18 @@
                 inputBuffer.push(typedValue);
             }
         }
+
+        var onInputBoxCompUpdate = _.debounce( function (e) {
+            var pos = utils.getCaratPosition(elmInputBox[0]);
+            var text = elmInputBox.val();
+            var rest = text.slice(pos).split(settings.triggerCharPattern)[0];
+            var prev = utils.lastIndexOf(text.slice(0, pos), settings.triggerCharPattern);
+            if ( text && prev !== -1 ) {
+                inputBuffer = ( text.slice(prev, pos) + rest ).split('');
+            }
+
+            onInputBoxInput(e);
+        }, 0 );
 
         function onInputBoxKeyDown(e) {
 
@@ -482,7 +502,7 @@
         else if (typeof method === 'string' && this.length > 0) {
 
             var instance = $.data(this[0], 'mentionsInput');
-            
+
             if (instance) {
                 if (_.isFunction(instance[method])) {
                     return instance[method].apply(this, Array.prototype.slice.call(outerArguments, 1));
@@ -505,7 +525,7 @@
 
             if (typeof method === 'object' || !method) {
                 return instance.init.call(this, this);
-            } 
+            }
 
         });
     };
